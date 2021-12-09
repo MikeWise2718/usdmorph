@@ -6,7 +6,7 @@
     upAxis = "Y"
 )
 
-def "SimpleScene"
+def Xform "SimpleScene"
 {
     matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, -1, 0), (1, 1, -1, 1) )
     uniform token[] xformOpOrder = ["xformOp:transform"]
@@ -494,7 +494,7 @@ def "SimpleScene"
         }
     }
 
-    def "SphereHolder1"
+    def Xform "SphereHolder1"
     {
         matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (3, 0, 0, 1) )
         uniform token[] xformOpOrder = ["xformOp:transform"]
@@ -602,7 +602,7 @@ def "SimpleScene"
         }
     }
 
-    def "SphereHolder2"
+    def Xform "SphereHolder2"
     {
         matrix4d xformOp:transform = ( (1, 0, 0, 0), (0, 1, 0, 0), (0, 0, 1, 0), (0, 0, 3.119999885559082, 1) )
         uniform token[] xformOpOrder = ["xformOp:transform"]
@@ -643,7 +643,7 @@ def "SimpleScene"
     }
 }
 
-def "someValue1"
+def Xform "someValue1"
 {
     float3[] aBoundingBox = [(0, 0, 0), (0, 0, 0)]
     int[] anArrayOfInts = [1, 2, 3, 4]

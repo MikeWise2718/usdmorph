@@ -154,13 +154,37 @@ def initbuffer(usdfname:str):
     print(f"read {len(lines)} lines")
     return lines
 
+def tokenize(line:str):
+    toks = line.split()
+    return toks
+
+def isquoted(tok:str) -> bool:
+    if (len(tok)>=2):
+        q1 = tok.startswith("'") and tok.endswith("'")
+        if (q1):
+            return True
+        q2 = tok.startswith('"') and tok.endswith('"')
+        if (q2):
+            return True
+    return False
+
+def insertXform(iline:str) -> str:
+    rv = iline.replace("def","def Xform")
+    return rv
+
+
 def dowork(ifname:str,ofname:str):
     lines = initbuffer(ifname)
     olines = []
     for line in lines:
-        nowhite = line.lstrip()
-        if nowhite.startswith('def'):
+        toks = tokenize(line)
+
+        if len(toks)>1 and toks[0]=='def' and isquoted(toks[1]):
             print(line.rstrip())
+            nline = insertXform(line)
+            print(nline.rstrip())
+            line = nline
+
         olines.append(line)
     if ofname!="":
         with open(ofname,"w") as file:
