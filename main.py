@@ -155,7 +155,18 @@ def initbuffer(usdfname:str):
     return lines
 
 def dowork(ifname:str,ofname:str):
-    initbuffer(ifname)
+    lines = initbuffer(ifname)
+    olines = []
+    for line in lines:
+        nowhite = line.lstrip()
+        if nowhite.startswith('def'):
+            print(line.rstrip())
+        olines.append(line)
+    if ofname!="":
+        with open(ofname,"w") as file:
+            file.writelines(olines)
+        print(f"wrote {len(olines)} to {ofname}")
+    
 
 print(f"USD morph")
 
