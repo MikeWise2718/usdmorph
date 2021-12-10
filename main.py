@@ -117,16 +117,18 @@ def parseargs():
                         help='the input USD file name')
     parser.add_argument('--ofname',default="",
                         help='the output USD file name - default has -out appended to name')
-    # parser.add_argument('--buffer',
-    #                     help='buffer the lines before processing')
+    parser.add_argument('--buffer',
+                        help='buffer the lines before processing')
     # parser.add_argument('--input',
     #                     help='the directory of the input frames')
     # parser.add_argument('--output',
     #                     help='the direcotry to store object detection results')
     # parser.add_argument('--frame',default="",
     #                     help='the frame file name')
-    # parser.add_argument('--delframe',default=False,action='store_true',
-    #                     help='delete frame after detection')
+    parser.add_argument('--subXform',default=True,action='store_false',
+                        help='sub empty Prim Templates with Xform')
+    parser.add_argument('--printAllDefs',default=False,action='store_true',
+                        help='sub empty Prim Templates with Xform')
     # parser.add_argument('--boxplotlev',default=0,type=int,
     #                     help='create plots with detection boxes')
     # parser.add_argument('--redactlev',default=0,type=int,
@@ -174,18 +176,26 @@ def insertXform(iline:str) -> str:
 
 
 def dowork(ifname:str,ofname:str):
+    global args
     lines = initbuffer(ifname)
     olines = []
     for line in lines:
         toks = tokenize(line)
 
-        if len(toks)>1 and toks[0]=='def' and isquoted(toks[1]):
-            print(line.rstrip())
-            nline = insertXform(line)
-            print(nline.rstrip())
-            line = nline
+        if args.printAllDefs:
+            if len(toks)>1 and toks[0]=='def':
+                print(line.rstrip())
 
-        olines.append(line)
+        if ofname!="" and args.subXform:
+            if len(toks)>1 and toks[0]=='def' and isquoted(toks[1]):
+                print(line.rstrip())
+                nline = insertXform(line)
+                print(nline.rstrip())
+                line = nline
+
+        if ofname!="" and args.subXform:
+            olines.append(line)
+
     if ofname!="":
         with open(ofname,"w") as file:
             file.writelines(olines)
