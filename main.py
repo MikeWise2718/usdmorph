@@ -123,6 +123,17 @@ class UsdPrim:
             msg = f'prim: type:{Fore.BLUE}{v["type"]:15}{Fore.GREEN}  from {Fore.RED}{v["startidx"]:5}{Fore.GREEN} to {Fore.RED}{v["endidx"]:5}  {Fore.YELLOW}{k}'
             print(Fore.GREEN,msg)
 
+    def primFromLine(self,linenum:int)->str:
+        primname = "(null)"
+        mindist = 9000000
+        for k,v in self.primdict.items():
+            if v["startidx"]<=linenum and linenum<=v["endidx"]:
+                dist = linenum-v["startidx"]
+                if dist<mindist:
+                    primname = v["fullname"]
+                    mindist = dist
+        return primname
+
 
 
 def initbuffer(usdfname:str):
@@ -157,22 +168,25 @@ def dowork(ifname:str,ofname:str):
     usdprim.dumpPrims()
     print(Fore.YELLOW,"Starting processing")
     olines = []
+    linenum = 0
     for line in lines:
         toks = tokenize(line)
 
+        primfullname = usdprim.primFromLine(linenum)
         if args.printAllDefs:
             if len(toks)>1 and toks[0]=='def':
-                print(line.rstrip())
+                print(str(linenum)+Fore.MAGENTA+line.rstrip()+" "+Fore.BLUE+primfullname)
 
         if ofname!="" and args.subXform:
             if len(toks)>1 and toks[0]=='def' and isquoted(toks[1]):
-                print(line.rstrip())
+                print(str(linenum)+Fore.RED+line.rstrip()+" "+Fore.BLUE+primfullname)
                 nline = insertXform(line)
-                print(nline.rstrip())
+                print(str(linenum)+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
                 line = nline
 
         if ofname!="" and args.subXform:
             olines.append(line)
+        linenum += 1
 
     if ofname!="":
         with open(ofname,"w") as file:
