@@ -29,31 +29,57 @@ args = parseargs()
 
 primdict = {}
 prim_cur = None
+prim_cur_list = []
+
 def initPrimList():
     primdict = {}
 
 def addPrim(type:str,qname:str,lineidx:int):
     global primdict,prim_cur
-    fullname = qname
+    uqname = remove_quotes(qname)
+    fullname = get_prim_cur_path_name() + uqname
     if fullname not in primdict:
         entry = {}
         entry["type"] = type
         entry["qname"] = qname
+        entry["uqname"] = uqname
         entry["fullname"] = fullname
         entry["endidx"] = -1
         entry["startidx"] = lineidx
         primdict[fullname] = entry
-        prim_cur = entry
+        push_prim_cur(entry)
+
+def get_prim_cur_path_name():
+    path_name = "/"
+    for entry in prim_cur_list:
+        path_name += remove_quotes(entry["uqname"]) + "/"
+    return path_name
+
+def push_prim_cur(entry):
+    prim_cur_list.append(entry)
+
+def pop_prim_cur():
+    ln = len(prim_cur_list)
+    if ln>0:
+        entry = prim_cur_list[ln-1]
+        prim_cur_list.remove(entry)
+
+def get_prim_cur():
+    ln = len(prim_cur_list)
+    if ln==0:
+        return None
+    return prim_cur_list[ln-1]
 
 def closePrim(linenum:int):
-    global primdict,prim_cur
+    global primdict
+    prim_cur = get_prim_cur();
     if (prim_cur is not None):
         prim_cur["endidx"] = linenum
-
+    pop_prim_cur()
 
 
 def extractPrims(linebuf:list):
-    global primdict,prim_cur
+    global primdict
     lineidx = 0
     for line in linebuf:
         tok = tokenize(line)
@@ -75,9 +101,9 @@ def extractPrims(linebuf:list):
         lineidx += 1
 
 def dumpPrims():
-    global primdict,prim_cur
+    global primdict
     for k,v in primdict.items():
-        msg = f'prim - fullname:{k} type:{v["type"]}  qname:{v["qname"]}from {v["startidx"]} to {v["endidx"]}'
+        msg = f'prim - fullname:{Fore.YELLOW}{k}{Fore.GREEN} type:{Fore.BLUE}{v["type"]}{Fore.GREEN}  qname:{v["qname"]}from {v["startidx"]} to {v["endidx"]}'
         print(Fore.GREEN,msg)
 
 
@@ -101,6 +127,15 @@ def isquoted(tok:str) -> bool:
         if (q2):
             return True
     return False
+
+def remove_quotes(tok:str):
+    tok = tok.removeprefix("'")
+    tok = tok.removeprefix('"')
+    tok = tok.removesuffix("'")
+    tok = tok.removesuffix('"')
+    return tok
+
+
 
 def insertXform(iline:str) -> str:
     rv = iline.replace("def","def Xform")
