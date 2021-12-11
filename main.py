@@ -1,6 +1,7 @@
 import argparse
 import time
 import datetime
+from typing import Literal
 import colorama
 from colorama import Fore, Back, Style
 colorama.init()
@@ -27,84 +28,100 @@ def parseargs():
 args = parseargs()
     
 
-primdict = {}
-prim_cur = None
-prim_cur_list = []
 
-def initPrimList():
+class UsdPrim:
     primdict = {}
-
-def addPrim(type:str,qname:str,lineidx:int):
-    global primdict,prim_cur
-    uqname = remove_quotes(qname)
-    fullname = get_prim_cur_path_name() + uqname
-    if fullname not in primdict:
-        entry = {}
-        entry["type"] = type
-        entry["qname"] = qname
-        entry["uqname"] = uqname
-        entry["fullname"] = fullname
-        entry["endidx"] = -1
-        entry["startidx"] = lineidx
-        primdict[fullname] = entry
-        push_prim_cur(entry)
-
-def get_prim_cur_path_name():
-    path_name = "/"
-    for entry in prim_cur_list:
-        path_name += remove_quotes(entry["uqname"]) + "/"
-    return path_name
-
-def push_prim_cur(entry):
-    prim_cur_list.append(entry)
-
-def pop_prim_cur():
-    ln = len(prim_cur_list)
-    if ln>0:
-        entry = prim_cur_list[ln-1]
-        prim_cur_list.remove(entry)
-
-def get_prim_cur():
-    ln = len(prim_cur_list)
-    if ln==0:
-        return None
-    return prim_cur_list[ln-1]
-
-def closePrim(linenum:int):
-    global primdict
-    prim_cur = get_prim_cur();
-    if (prim_cur is not None):
-        prim_cur["endidx"] = linenum
-    pop_prim_cur()
+    prim_cur = None
+    prim_cur_list = []
 
 
-def extractPrims(linebuf:list):
-    global primdict
-    lineidx = 0
-    for line in linebuf:
-        tok = tokenize(line)
-        if len(tok)==0:
-            continue
-        if tok[0]=='def': 
-            if len(tok)<=1:
-                addPrim("(missing type)","(missing qname)",lineidx)
-            if isquoted(tok[1]):
-                addPrim("(missing type)",tok[1],lineidx)
-            else:
-                if (len(tok)<2):
-                    qname = "(missing qname)"
+    def __init__(self):
+        self.primdict = {}
+
+    def addPrim(self,type:str,qname:str,lineidx:int):
+        uqname = self.remove_quotes(qname)
+        fullname = self.get_prim_cur_path_name() + uqname
+        if fullname not in self.primdict:
+            entry = {}
+            entry["type"] = type
+            entry["qname"] = qname
+            entry["uqname"] = uqname
+            entry["fullname"] = fullname
+            entry["endidx"] = -1
+            entry["startidx"] = lineidx
+            self.primdict[fullname] = entry
+            self.push_prim_cur(entry)
+
+    def remove_quotes(self,tok:str):
+        tok = tok.removeprefix("'")
+        tok = tok.removeprefix('"')
+        tok = tok.removesuffix("'")
+        tok = tok.removesuffix('"')
+        return tok       
+
+    def isquoted(self,tok:str) -> bool:
+        if (len(tok)>=2):
+            q1 = tok.startswith("'") and tok.endswith("'")
+            if (q1):
+                return True
+            q2 = tok.startswith('"') and tok.endswith('"')
+            if (q2):
+                return True
+        return False             
+
+    def get_prim_cur_path_name(self):
+        path_name = "/"
+        for entry in self. prim_cur_list:
+            path_name += self.remove_quotes(entry["uqname"]) + "/"
+        return path_name
+
+    def push_prim_cur(self,entry):
+        self.prim_cur_list.append(entry)
+
+    def pop_prim_cur(self):
+        ln = len(self.prim_cur_list)
+        if ln>0:
+            entry = self.prim_cur_list[ln-1]
+            self.prim_cur_list.remove(entry)
+
+    def get_prim_cur(self):
+        ln = len(self.prim_cur_list)
+        if ln==0:
+            return None
+        return self.prim_cur_list[ln-1]
+
+    def closePrim(self,linenum:int):
+        prim_cur = self.get_prim_cur();
+        if (prim_cur is not None):
+            prim_cur["endidx"] = linenum
+        self.pop_prim_cur()
+
+
+    def extractPrims(self,linebuf:list):
+        lineidx = 0
+        for line in linebuf:
+            tok = tokenize(line)
+            if len(tok)==0:
+                continue
+            if tok[0]=='def': 
+                if len(tok)<=1:
+                    self.addPrim("(missing type)","(missing qname)",lineidx)
+                if self.isquoted(tok[1]):
+                    self.addPrim("(missing type)",tok[1],lineidx)
                 else:
-                    qname = tok[2]
-                addPrim(tok[1],qname,lineidx)
-        elif tok[0]=="}":
-            closePrim(lineidx)
-        lineidx += 1
+                    if (len(tok)<2):
+                        qname = "(missing qname)"
+                    else:
+                        qname = tok[2]
+                    self.addPrim(tok[1],qname,lineidx)
+            elif tok[0]=="}":
+                self.closePrim(lineidx)
+            lineidx += 1
 
-def dumpPrims():
-    global primdict
-    for k,v in primdict.items():
-        msg = f'prim - fullname:{Fore.YELLOW}{k}{Fore.GREEN} type:{Fore.BLUE}{v["type"]}{Fore.GREEN}  qname:{v["qname"]}from {v["startidx"]} to {v["endidx"]}'
-        print(Fore.GREEN,msg)
+    def dumpPrims(self):
+        for k,v in self.primdict.items():
+            msg = f'prim: type:{Fore.BLUE}{v["type"]:15}{Fore.GREEN}  from {Fore.RED}{v["startidx"]:5}{Fore.GREEN} to {Fore.RED}{v["endidx"]:5}  {Fore.YELLOW}{k}'
+            print(Fore.GREEN,msg)
 
 
 
@@ -128,25 +145,16 @@ def isquoted(tok:str) -> bool:
             return True
     return False
 
-def remove_quotes(tok:str):
-    tok = tok.removeprefix("'")
-    tok = tok.removeprefix('"')
-    tok = tok.removesuffix("'")
-    tok = tok.removesuffix('"')
-    return tok
-
-
-
 def insertXform(iline:str) -> str:
     rv = iline.replace("def","def Xform")
     return rv
 
-
 def dowork(ifname:str,ofname:str):
     global args
     lines = initbuffer(ifname)
-    extractPrims(lines)
-    dumpPrims()
+    usdprim = UsdPrim()
+    usdprim.extractPrims(lines)
+    usdprim.dumpPrims()
     print(Fore.YELLOW,"Starting processing")
     olines = []
     for line in lines:
