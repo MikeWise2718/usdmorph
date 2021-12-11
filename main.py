@@ -102,6 +102,7 @@ class UsdPrim:
         for line in linebuf:
             tok = tokenize(line)
             if len(tok)==0:
+                lineidx += 1
                 continue
             if tok[0]=='def': 
                 if len(tok)<=1:
