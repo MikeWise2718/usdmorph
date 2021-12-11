@@ -21,5 +21,13 @@
             "args": ["--ifname","USD/SceneFile.usda","--ofname","out/SceneFile.out.usda"],
             "console": "integratedTerminal"
         },
+        {
+            "name": "test sceneFile",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": ["--ifname","USD/SceneFile.usda","--ofname","out/SceneFile.out.usda"],
+            "console": "integratedTerminal"
+        },        
     ]
 }
