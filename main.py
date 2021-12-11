@@ -101,6 +101,7 @@ class UsdPrim:
     def extractPrims(self,linebuf:list):
         lineidx = 0
         curlycount = 0
+        triggercc = 0
         for line in linebuf:
             tok = tokenize(line)
             if len(tok)==0:
@@ -124,8 +125,13 @@ class UsdPrim:
                     else:
                         qname = tok[2]
                 self.addPrim(ptype,qname,lineidx,curlycount)
-            elif tok[0]=="}":
-                self.closePrim(lineidx)
+                triggercc = curlycount
+            # elif tok[0]=="}":
+            #     self.closePrim(lineidx)
+            elif curlycount<=triggercc:
+                 self.closePrim(lineidx)
+                 cp = self.get_prim_cur()
+                 triggercc = curlycount
             lineidx += 1
 
     def dumpPrims(self):
