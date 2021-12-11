@@ -38,7 +38,7 @@ class UsdPrim:
     def __init__(self):
         self.primdict = {}
 
-    def addPrim(self,type:str,qname:str,lineidx:int):
+    def addPrim(self,type:str,qname:str,lineidx:int,curlycount):
         uqname = self.remove_quotes(qname)
         fullname = self.get_prim_cur_path_name() + uqname
         if fullname not in self.primdict:
@@ -49,6 +49,7 @@ class UsdPrim:
             entry["fullname"] = fullname
             entry["endidx"] = -1
             entry["startidx"] = lineidx
+            entry["curlycount"] = curlycount
             self.primdict[fullname] = entry
             self.push_prim_cur(entry)
 
@@ -99,29 +100,37 @@ class UsdPrim:
 
     def extractPrims(self,linebuf:list):
         lineidx = 0
+        curlycount = 0
         for line in linebuf:
             tok = tokenize(line)
             if len(tok)==0:
                 lineidx += 1
                 continue
-            if tok[0]=='def': 
+            curlycount += line.count('{')
+            curlycount -= line.count('}')  
+            msg = f'cc:{Fore.BLUE}{curlycount} {Fore.GREEN}line:{line}'
+            # print(msg)
+            if tok[0]=='def':
                 if len(tok)<=1:
-                    self.addPrim("(missing type)","(missing qname)",lineidx)
+                    ptype = "(missing type)"
+                    qname = "(missing qname)"
                 if self.isquoted(tok[1]):
-                    self.addPrim("(missing type)",tok[1],lineidx)
+                    ptype = "(missing type)"
+                    qname = tok[1]
                 else:
+                    ptype = tok[1]
                     if (len(tok)<2):
                         qname = "(missing qname)"
                     else:
                         qname = tok[2]
-                    self.addPrim(tok[1],qname,lineidx)
+                self.addPrim(ptype,qname,lineidx,curlycount)
             elif tok[0]=="}":
                 self.closePrim(lineidx)
             lineidx += 1
 
     def dumpPrims(self):
         for k,v in self.primdict.items():
-            msg = f'prim: type:{Fore.BLUE}{v["type"]:15}{Fore.GREEN}  from {Fore.RED}{v["startidx"]:5}{Fore.GREEN} to {Fore.RED}{v["endidx"]:5}  {Fore.YELLOW}{k}'
+            msg = f'prim: type:{Fore.BLUE}{v["type"]:15}{Fore.GREEN}  from {Fore.RED}{v["startidx"]:5}{Fore.GREEN} to {Fore.RED}{v["endidx"]:5} cc:{v["curlycount"]:2} {Fore.YELLOW}{k}'
             print(Fore.GREEN,msg)
 
     def primFromLine(self,linenum:int)->str:
