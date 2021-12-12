@@ -643,7 +643,7 @@ def Xform "SimpleScene"
     }
 }
 
-def Xform "someValue1"
+def "someValue1"
 {
     float3[] aBoundingBox = [(0, 0, 0), (0, 0, 0)]
     int[] anArrayOfInts = [1, 2, 3, 4]
