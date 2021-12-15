@@ -77,9 +77,11 @@ class UsdPrim:
                 aft = ""
                 sarr = line.split("=")
                 if (len(sarr)>=1):
-                    fore = sarr[0];
+                    fore = sarr[0]
                 if (len(sarr)>=2):
-                    aft = sarr[1];
+                    aft = sarr[1]
+                if primfullname=="/Human_0064/Materials/Man001_color_28332/PreviewSurface":
+                    pass
                 for attname in usdattlist:
                     if attname in fore:
                         self.addAttribute(entry,attname,fore,aft)
@@ -228,13 +230,11 @@ def isquoted(tok:str) -> bool:
             return True
     return False
 
-def insertXform(iline:str) -> str:
-    rv = iline.replace("def","def Xform")
+
+def insertPtype(iline:str,ptype:str)->str:
+    rv = iline.replace("def",f"def {ptype}")
     return rv
 
-def insertShader(iline:str) -> str:
-    rv = iline.replace("def","def Shader")
-    return rv    
 
 def morphLines(ifname:str,ofname:str):
     global args
@@ -245,6 +245,8 @@ def morphLines(ifname:str,ofname:str):
     usdprim.dumpPrims()
     olines = []
     linenum = 0
+    nXformChanges = 0
+    nShaderChanges = 0
     print(Fore.YELLOW,"Starting morphing"+Fore.BLUE)
     for line in lines:
         primfullname = usdprim.primFromLine(linenum)
@@ -257,13 +259,13 @@ def morphLines(ifname:str,ofname:str):
 
             if ofname!="" and ptype=="(ptype missing)":
                 print(str(linenum),": "+Fore.RED+line.rstrip()+" "+Fore.BLUE+primfullname)
-                if args.subXform:
-                    if usdprim.hasAttribute(primfullname,"transform"):
-                        nline = insertXform(line)
+                if args.subXform and usdprim.hasAttribute(primfullname,"transform"):
+                        nline = insertPtype(line,"Xform")
+                        nXformChanges += 1
                         print(str(linenum),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
-                if args.subShader:
-                    if usdprim.hasAttribute(primfullname,"input:diffuse"):
-                        nline = insertShader(line)
+                elif args.subShader and usdprim.hasAttribute(primfullname,"inputs:diffuseColor"):
+                        nline = insertPtype(line,"Shader")
+                        nShaderChanges += 1
                         print(str(linenum),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
 
         if ofname!="" and args.subXform:
@@ -274,10 +276,10 @@ def morphLines(ifname:str,ofname:str):
     if ofname!="":
         with open(ofname,"w") as file:
             file.writelines(olines)
-        print(f"wrote {len(olines)} to {ofname}")
+        print(f"wrote {len(olines)} to {ofname} - Changes: Xform:{nXformChanges} Shader:{nShaderChanges}")
 
 
-print(f"USD morph")
+print(Style.BRIGHT+Back.BLACK+f"USD morph")
 
 if (args.ifname==""):
     print(f"error - no name specified")

@@ -1,0 +1,14 @@
+- cluster scheduling 
+- variaty of projects interesting to VS Code, Exentsions, IaaS, 
+- Need to do a scalable web app
+- Forms Recoginizer - built models for invoicing - 6 signma project 
+- Out of box models for recognizaion
+- Codling C#, TypeScript with a bit of Python
+- More commercial
+- No game engine
+- Husband in Madrid already
+- Hobbies
+	- Traveling, Seasons, Nature
+	- Wine Tasting, French Learning, CSE has had a 
+- CSE politics is hard
+- Used to feel feel joy using Azure with VMs

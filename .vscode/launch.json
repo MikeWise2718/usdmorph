@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python: Current File",
             "type": "python",
@@ -19,6 +20,21 @@
             "args": ["--ifname","USD/SceneFile.usda","--ofname","out/SceneFile.out.usda"],
             "console": "integratedTerminal"
         },
-     
+        {
+            "name": "test Stand1-queue",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": ["--ifname","USD/Stand1-queue.usda","--ofname","out/Stand1-queue.out.usda"],
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "test human64",
+            "type": "python",
+            "request": "launch",
+            "program": "main.py",
+            "args": ["--ifname","HumanUsd/h64/Human-0064.usda","--ofname","HumanUsd/h64/Human-0064.out.usda"],
+            "console": "integratedTerminal"
+        },    
     ]
 }

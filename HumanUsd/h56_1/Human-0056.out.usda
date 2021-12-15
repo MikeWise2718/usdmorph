@@ -18,7 +18,7 @@ def Xform "Human_0056"
             token outputs:surface.connect = </Human_0056/Materials/Businesswoman008_color_32036/PreviewSurface.outputs:surface>
             token[] requiredKeywords
 
-            def Xform "PreviewSurface"
+            def "PreviewSurface"
             {
                 token info:id = "UsdPreviewSurface"
                 float inputs:clearcoat = 0
