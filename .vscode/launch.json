@@ -5,6 +5,7 @@
     "version": "0.2.0",
     "configurations": [
 
+
         {
             "name": "Python: Current File",
             "type": "python",
@@ -17,7 +18,7 @@
             "type": "python",
             "request": "launch",
             "program": "main.py",
-            "args": ["--ifname","USD/SceneFile.usda","--ofname","out/SceneFile.out.usda"],
+            "args": ["--ifname","USD/SceneFile.usda","--ofname","out/SceneFile.out.usda","--subXform","--debugOutput"],
             "console": "integratedTerminal"
         },
         {
@@ -25,7 +26,7 @@
             "type": "python",
             "request": "launch",
             "program": "main.py",
-            "args": ["--ifname","USD/Stand1-queue.usda","--ofname","out/Stand1-queue.out.usda"],
+            "args": ["--ifname","USD/Stand1-queue.usda","--ofname","out/Stand1-queue.out.usda","--debugOutput"],
             "console": "integratedTerminal"
         },
         {

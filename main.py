@@ -23,6 +23,8 @@ def parseargs():
                         help='sub empty Prim Templates with Shader if they have an input:diffuse attribute')
     parser.add_argument('--printAllDefs',default=False,action='store_true',
                         help='sub empty Prim Templates with Xform')
+    parser.add_argument('--debugOutput',default=False,action='store_true',
+                        help='Generate Debug Output')
     args = parser.parse_args() 
     print(Fore.YELLOW+"parsed args")
     return args
@@ -39,27 +41,59 @@ class UsdPrim:
     # USD Home page - https://graphics.pixar.com/usd
     # Terms and Concepts - https://graphics.pixar.com/usd/release/glossary.html  
     primdict = {}
+    fullnamedict = {}
     prim_cur = None
     prim_cur_list = []
+    dboutlines = []
+    seenbeforecount = 0
 
     def __init__(self):
         self.primdict = {}
 
+    def registerFullName(self,fullname:str)->int:
+        if fullname not in self.fullnamedict:
+            self.fullnamedict[fullname] = 1
+        else:
+            self.fullnamedict[fullname] += 1
+        return self.fullnamedict[fullname]
+
+
+
     def addPrim(self,type:str,qname:str,lineidx:int,curlycount):
         uqname = self.remove_quotes(qname)
+        if lineidx==6385:
+            pass
+        if lineidx==4048:
+            pass        
         fullname = self.get_prim_cur_path_name() + uqname
-        if fullname not in self.primdict:
+        cnt = self.registerFullName(fullname)
+        keyname = f"{fullname}.{cnt}"
+        notseenbefore = fullname not in self.primdict
+        if notseenbefore:
             entry = {}
             entry["type"] = type
             entry["qname"] = qname
             entry["uqname"] = uqname
             entry["fullname"] = fullname
+            entry["keyname"] = keyname
             entry["startidx"] = lineidx
             entry["endidx"] = -1
             entry["curlycount"] = curlycount
             entry["attributes"] = {}
-            self.primdict[fullname] = entry
+            self.primdict[keyname] = entry
             self.push_prim_cur(entry)
+        else:
+            msg = f"{Fore.RED}seenbefore:{fullname} cnt:{cnt}"
+            print(msg)
+            self.dboutlines.append(msg)
+            self.seenbeforecount += 1
+
+
+    def closePrim(self,linenum:int):
+        prim_cur = self.get_prim_cur()
+        if (prim_cur is not None):
+            prim_cur["endidx"] = linenum
+        self.pop_prim_cur()            
 
     def extractAttsForPrim(self,primfullname,lines):
         entry = self.primdict.get(primfullname)
@@ -88,7 +122,7 @@ class UsdPrim:
     
     def addAttribute(self,entry,attname:str,fore:str,aft:str):
         attdict = entry["attributes"]
-        attdict[attname] = {"name":attname,"fore":fore,"aft":aft}
+        attdict[attname] = {"attname":attname,"fore":fore,"aft":aft}
 
     def hasAttribute(self,primfullname:str,attname:str)->bool:
         entry = self.primdict.get(primfullname)
@@ -136,14 +170,12 @@ class UsdPrim:
             return None
         return self.prim_cur_list[ln-1]
 
-    def closePrim(self,linenum:int):
-        prim_cur = self.get_prim_cur();
-        if (prim_cur is not None):
-            prim_cur["endidx"] = linenum
-        self.pop_prim_cur()
 
-    def extractRawPrim(self,line:str):
+
+    def extractRawPrim(self,line:str,lineidx:int):
         tok = line.split() # whitespace split
+        if lineidx==645:
+            pass
         isprim = False
         ptype = "(ptype undefined)"
         qname = "(qname undefined)"
@@ -163,23 +195,42 @@ class UsdPrim:
                     qname = tok[2]        
         return (isprim,ptype,qname)
 
-    def extractPrims(self,linebuf:list):
+    def extractPrims(self,linebuf:list,dbout:bool):
         lineidx = 0
         curlycount = 0
         triggercc = 0
         for line in linebuf:
             curlycount += line.count('{')
             curlycount -= line.count('}')  
-            msg = f'cc:{Fore.BLUE}{curlycount} {Fore.GREEN}line:{line}'
-            (isprim,ptype,qname) = self.extractRawPrim(line)
+            msg = f'{Fore.WHITE}{lineidx:5} {Fore.BLUE}cc:{curlycount} {Fore.YELLOW}"{line.strip()[:60]}"'
+            if dbout:
+                print(msg)
+                self.dboutlines.append(msg)
+            (isprim,ptype,qname) = self.extractRawPrim(line,lineidx)
             if isprim:
                 self.addPrim(ptype,qname,lineidx,curlycount)
                 triggercc = curlycount
+                if dbout:
+                   msg = f'{Fore.BLUE}Add Prim:{qname} idx:{lineidx}'                
+                   print(msg)
+                   self.dboutlines.append(msg)
             elif curlycount<=triggercc:
                  self.closePrim(lineidx)
+                 msg = ""
+                 if dbout:
+                    prim_cur = self.get_prim_cur()
+                    if prim_cur is not None:
+                        uqname = prim_cur["uqname"]
+                        msg = f'{Fore.CYAN}Close Prim:{uqname} idx:{lineidx}'
+                    else:
+                        msg = f'{Fore.CYAN}Close Prim:None idx:{lineidx}'
+                    print(msg)
+                    self.dboutlines.append(msg)
+
                  cp = self.get_prim_cur()
                  triggercc = curlycount
             lineidx += 1
+        print(Fore.CYAN,f"End curlycount:{curlycount} seenbeforecount:{self.seenbeforecount} prims:{len(self.primdict.items())}")
 
         for  k,v in self.primdict.items():
             self.extractAttsForPrim(k,linebuf)
@@ -194,7 +245,7 @@ class UsdPrim:
             if len(atts)==0:
                 print(Fore.CYAN,"  no attributes")
             for k,v in atts.items():
-                msg = f'  {v["name"]}    -  {v["fore"]}'
+                msg = f'  att:{v["attname"]:30}    - fore:{v["fore"]}'
                 print(Fore.BLUE,msg)
 
         print(Fore.BLUE,f"Found {len(self.primdict)} prims")
@@ -206,7 +257,7 @@ class UsdPrim:
             if v["startidx"]<=linenum and linenum<=v["endidx"]:
                 dist = linenum-v["startidx"]
                 if dist<mindist:
-                    primname = v["fullname"]
+                    primname = v["keyname"]
                     mindist = dist
         return primname
 
@@ -223,10 +274,10 @@ def tokenize(line:str):
 def isquoted(tok:str) -> bool:
     if (len(tok)>=2):
         q1 = tok.startswith("'") and tok.endswith("'")
-        if (q1):
+        if q1:
             return True
         q2 = tok.startswith('"') and tok.endswith('"')
-        if (q2):
+        if q2:
             return True
     return False
 
@@ -236,55 +287,63 @@ def insertPtype(iline:str,ptype:str)->str:
     return rv
 
 
-def morphLines(ifname:str,ofname:str):
+def morphLines(ifname:str,ofname:str,dbout:bool):
     global args
     print(Fore.YELLOW,"Starting usd procssing"+Fore.BLUE)
     lines = initbuffer(ifname)
     usdprim = UsdPrim()
-    usdprim.extractPrims(lines)
+    usdprim.extractPrims(lines,dbout)
     usdprim.dumpPrims()
     olines = []
-    linenum = 0
+    lineidx = 0
     nXformChanges = 0
     nShaderChanges = 0
     print(Fore.YELLOW,"Starting morphing"+Fore.BLUE)
     for line in lines:
-        primfullname = usdprim.primFromLine(linenum)
-        (isprim,ptype,qname) = usdprim.extractRawPrim(line)
+        primfullname = usdprim.primFromLine(lineidx)
+        (isprim,ptype,qname) = usdprim.extractRawPrim(line,lineidx)
 
         nline = line
         if isprim:
             if args.printAllDefs:
-                print(str(linenum)+Fore.MAGENTA+line.rstrip()+" "+Fore.BLUE+primfullname)
+                print(str(lineidx)+Fore.MAGENTA+line.rstrip()+" "+Fore.BLUE+primfullname)
 
             if ofname!="" and ptype=="(ptype missing)":
-                print(str(linenum),": "+Fore.RED+line.rstrip()+" "+Fore.BLUE+primfullname)
+                print(str(lineidx),": "+Fore.RED+line.rstrip()+" "+Fore.BLUE+primfullname)
                 if args.subXform and usdprim.hasAttribute(primfullname,"transform"):
                         nline = insertPtype(line,"Xform")
                         nXformChanges += 1
-                        print(str(linenum),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
+                        print(str(lineidx),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
                 elif args.subShader and usdprim.hasAttribute(primfullname,"inputs:diffuseColor"):
                         nline = insertPtype(line,"Shader")
                         nShaderChanges += 1
-                        print(str(linenum),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
+                        print(str(lineidx),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
 
         if ofname!="" and args.subXform:
             olines.append(nline)
 
-        linenum += 1
+        lineidx += 1
 
     if ofname!="":
         with open(ofname,"w") as file:
             file.writelines(olines)
         print(f"wrote {len(olines)} to {ofname} - Changes: Xform:{nXformChanges} Shader:{nShaderChanges}")
 
+    if dbout:
+        sep = "\n" 
+        newlines = sep.join(usdprim.dboutlines)
+        with open("dbout.ansi","w") as file:
+            file.writelines(newlines)
+
 
 print(Style.BRIGHT+Back.BLACK+f"USD morph")
+print(Fore.YELLOW,f"subXform:{args.subXform}")
+print(Fore.YELLOW,f"debugOutput:{args.debugOutput}")
 
 if (args.ifname==""):
     print(f"error - no name specified")
 else:
-    morphLines(args.ifname,args.ofname)    
+    morphLines(args.ifname,args.ofname,args.debugOutput)    
 
 elap = time.time() - starttime
 print(Fore.BLUE+f"main execution took {elap:.2f} secs")
