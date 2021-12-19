@@ -20,7 +20,9 @@ def parseargs():
     parser.add_argument('--subXform',default=True,action='store_false',
                         help='sub empty Prim Templates with Xform if they have a xFormOp:transform attribute')
     parser.add_argument('--subShader',default=True,action='store_false',
-                        help='sub empty Prim Templates with Shader if they have an input:diffuse attribute')
+                        help='sub empty Prim Templates with Shader if they have an input:diffuse attribute or the right name')
+    parser.add_argument('--subGeom',default=True,action='store_false',
+                        help='sub empty Geom Templates the right name')
     parser.add_argument('--printAllDefs',default=False,action='store_true',
                         help='sub empty Prim Templates with Xform')
     parser.add_argument('--debugOutput',default=False,action='store_true',
@@ -74,6 +76,7 @@ class UsdPrim:
             entry["type"] = type
             entry["qname"] = qname
             entry["uqname"] = uqname
+            entry["basename"] = uqname
             entry["fullname"] = fullname
             entry["keyname"] = keyname
             entry["startidx"] = lineidx
@@ -131,6 +134,22 @@ class UsdPrim:
             return False
         rv = attname in entry["attributes"]
         return rv
+
+    def hasBasename(self,primfullname:str,qname:str)->bool:
+        entry = self.primdict.get(primfullname)
+        if entry==None:
+            print(f"Error in hasBasename {primfullname} not in primdict")
+            return False
+        rv = entry["basename"]==qname
+        return rv        
+
+    def hasBasenameSuffix(self,primfullname:str,qnamesuffix:str)->bool:
+        entry = self.primdict.get(primfullname)
+        if entry==None:
+            print(f"Error in hasBasenameSuffix {primfullname} not in primdict")
+            return False
+        rv = entry["basename"].endswith(qnamesuffix)
+        return rv        
 
     def remove_quotes(self,tok:str):
         tok = tok.removeprefix("'")
@@ -298,26 +317,44 @@ def morphLines(ifname:str,ofname:str,dbout:bool):
     lineidx = 0
     nXformChanges = 0
     nShaderChanges = 0
+    nSkelChanges = 0
     print(Fore.YELLOW,"Starting morphing"+Fore.BLUE)
     for line in lines:
         primfullname = usdprim.primFromLine(lineidx)
         (isprim,ptype,qname) = usdprim.extractRawPrim(line,lineidx)
+
+        if lineidx==519:
+            pass
 
         nline = line
         if isprim:
             if args.printAllDefs:
                 print(str(lineidx)+Fore.MAGENTA+line.rstrip()+" "+Fore.BLUE+primfullname)
 
+
             if ofname!="" and ptype=="(ptype missing)":
                 print(str(lineidx),": "+Fore.RED+line.rstrip()+" "+Fore.BLUE+primfullname)
-                if args.subXform and usdprim.hasAttribute(primfullname,"transform"):
-                        nline = insertPtype(line,"Xform")
-                        nXformChanges += 1
-                        print(str(lineidx),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
-                elif args.subShader and usdprim.hasAttribute(primfullname,"inputs:diffuseColor"):
+                if args.subShader and usdprim.hasAttribute(primfullname,"inputs:diffuseColor"):
                         nline = insertPtype(line,"Shader")
                         nShaderChanges += 1
                         print(str(lineidx),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
+                elif args.subShader and usdprim.hasBasename(primfullname,"PreviewSurface"):
+                        nline = insertPtype(line,"Shader")
+                        nShaderChanges += 1
+                        print(str(lineidx),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
+                elif args.subGeom and usdprim.hasBasename(primfullname,"Reference"):
+                        nline = insertPtype(line,"Skeleton")
+                        nSkelChanges += 1
+                        print(str(lineidx),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
+                elif args.subGeom and usdprim.hasBasenameSuffix(primfullname,"_Clone_"):
+                        nline = insertPtype(line,"SkelRoot")
+                        nSkelChanges += 1
+                        print(str(lineidx),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
+                elif args.subXform and usdprim.hasAttribute(primfullname,"transform"):
+                        nline = insertPtype(line,"Xform")
+                        nXformChanges += 1
+                        print(str(lineidx),": "+Fore.MAGENTA+nline.rstrip()+" "+Fore.BLUE+primfullname)
+                                        
 
         if ofname!="" and args.subXform:
             olines.append(nline)
@@ -327,7 +364,7 @@ def morphLines(ifname:str,ofname:str,dbout:bool):
     if ofname!="":
         with open(ofname,"w") as file:
             file.writelines(olines)
-        print(f"wrote {len(olines)} to {ofname} - Changes: Xform:{nXformChanges} Shader:{nShaderChanges}")
+        print(f"wrote {len(olines)} to {ofname} - Changes: Xform:{nXformChanges} Shader:{nShaderChanges} Skel:{nSkelChanges}")
 
     if dbout:
         sep = "\n" 
@@ -338,6 +375,8 @@ def morphLines(ifname:str,ofname:str,dbout:bool):
 
 print(Style.BRIGHT+Back.BLACK+f"USD morph")
 print(Fore.YELLOW,f"subXform:{args.subXform}")
+print(Fore.YELLOW,f"subShader:{args.subShader}")
+print(Fore.YELLOW,f"subGeom:{args.subGeom}")
 print(Fore.YELLOW,f"debugOutput:{args.debugOutput}")
 
 if (args.ifname==""):
