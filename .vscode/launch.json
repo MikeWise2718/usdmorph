@@ -34,7 +34,7 @@
             "type": "python",
             "request": "launch",
             "program": "main.py",
-            "args": ["--ifname","HumanUsd/h64/Human-0064.usda","--ofname","HumanUsd/h64/Human-0064.out.usda"],
+            "args": ["--ifname","HumanUsd/h64/Human-0064.usda","--ofname","HumanUsd/h64/Human-0064.out.usda","--debugOutput"],
             "console": "integratedTerminal"
         },    
     ]
