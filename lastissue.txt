@@ -1,0 +1,24 @@
+This is an annoyance rather than a bug, but when importing a USD object that has been created with the Unity USD package, every mesh  causes the following warning to be emmited. There are frequently thousands of these in even modestly sized scene. Since it is a depreciation warning many packages including even USD examples are affected. It is described in more detail in this USD github issue:  `https://github.com/PixarAnimationStudios/USD/issues/1370`
+
+```
+(USDtools) (.venv) D:\python\usdmorph\HumanUsd\h56>usdview Human-0056.usda
+Warning: in _DeprecatedBindingCheck at line 200 of D:\transfer\USD\pxr\usd\usdSkel\cacheImpl.cpp -- Found binding property </Human_0056/Businesswoman008_Clone_/H_DDS_LowRes.primvars:skel:jointIndices>, but the SkelBindingAPI was not applied on the owning prim. In the future, binding properties will be ignored unless the SkelBindingAPI is applied (see UsdSkelBindingAPI::Apply)
+Warning: in _DeprecatedBindingCheck at line 200 of D:\transfer\USD\pxr\usd\usdSkel\cacheImpl.cpp -- Found binding property </Human_0056/Businesswoman008_Clone_/H_DDS_LowRes.primvars:skel:jointWeights>, but the SkelBindingAPI was not applied on the owning prim. In the future, binding properties will be ignored unless the SkelBindingAPI is applied (see UsdSkelBindingAPI::Apply)
+Warning: in _DeprecatedBindingCheck at line 200 of D:\transfer\USD\pxr\usd\usdSkel\cacheImpl.cpp -- Found binding property </Human_0056/Businesswoman008_Clone_/H_DDS_LowRes.primvars:skel:geomBindTransform>, but the SkelBindingAPI was not applied on the owning prim. In the future, binding properties will be ignored unless the SkelBindingAPI is applied (see UsdSkelBindingAPI::Apply)
+Warning: in _DeprecatedBindingCheck at line 200 of D:\transfer\USD\pxr\usd\usdSkel\cacheImpl.cpp -- Found binding property </Human_0056/Businesswoman008_Clone_/H_DDS_LowRes.skel:joints>, but the SkelBindingAPI was not applied on the owning prim. In the future, binding properties will be ignored unless the SkelBindingAPI is applied (see UsdSkelBindingAPI::Apply)
+Warning: in _DeprecatedBindingCheck at line 200 of D:\transfer\USD\pxr\usd\usdSkel\cacheImpl.cpp -- Found binding property </Human_0056/Businesswoman008_Clone_/l_L_eye.primvars:skel:jointIndices>, but the SkelBindingAPI was not applied on the owning prim. In the future, binding properties will be ignored unless the SkelBindingAPI is applied (see UsdSkelBindingAPI::Apply)
+Warning: in _DeprecatedBindingCheck at line 200 of D:\transfer\USD\pxr\usd\usdSkel\cacheImpl.cpp -- Found binding property </Human_0056/Businesswoman008_Clone_/l_L_eye.primvars:skel:jointWeights>, but the SkelBindingAPI was not applied on the owning prim. In the future, binding properties will be ignored unless the SkelBindingAPI is applied (see UsdSkelBindingAPI::Apply)
+```
+
+It can be alleviated by adding an `prepend apiSchemas` argument to the Mesh prim definition as follows:
+
+```
+def Mesh "H_DDS_LowRes"( prepend apiSchemas = ["SkelBindingAPI"] )
+        {
+             ...
+```
+
+Notes:
+- Using Unity 2020.3.20f1
+- Using USD Package 3..0.0-exp.2
+- A repo with Python code that does a minimal parsing of a USDA file and repairs the issues 278, .... can be found at `https://github.com/MikeWise2718/usdmorph`  - hopefully it won't be needed long before these are all repaired in a new version.
