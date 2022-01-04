@@ -3,8 +3,7 @@ import time
 import datetime
 import colorama
 from colorama import Fore, Back, Style
-from usdprim import UsdPrim
-
+import usdmod
 
 colorama.init()
 starttime = time.time()
@@ -81,7 +80,7 @@ def appendSkelApiRef(iline: str) -> str:
     return rv
 
 
-def morphLines(lines: list[str], primcat: UsdPrim):
+def morphLines(lines: list[str], primcat: usdmod.PrimCat):
     global args
     print(Fore.YELLOW, "Starting usd procssing" + Fore.BLUE)
 
@@ -188,10 +187,10 @@ if (args.ifname == ""):
     print("error - no name specified")
 else:
     lines = initbuffer(args.ifname)
-    usdprim = UsdPrim(args)
-    usdprim.extractPrims(lines)
-    usdprim.dumpPrims()
-    (olines, dblines) = morphLines(lines, usdprim)
+    primcat = usdmod.PrimCat(args)
+    primcat.extractPrims(lines)
+    primcat.dumpPrims()
+    (olines, dblines) = morphLines(lines, primcat)
 
     if args.ofname != "":
         with open(args.ofname, "w") as file:
