@@ -41,7 +41,8 @@
    * Directory
    * Test code
    * Test script
-- Factor out morphing objects
+* Factor out morphing objects
+- Explicit options in morphing objects
 - Document Directories
 - Document Installation
    - how to create that .venv (VS Code docs)
