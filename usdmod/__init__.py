@@ -5,3 +5,4 @@
 #    https://stackoverflow.com/a/19011032/3458744
 #    https://realpython.com/absolute-vs-relative-python-imports/
 from .primcat import PrimCat
+from .morpher import Morpher

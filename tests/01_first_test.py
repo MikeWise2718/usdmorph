@@ -1,5 +1,7 @@
 import pytest
 import os
+import usdmod
+
 print(f"cwd:{os.getcwd()}")
 import usdmod
 
@@ -24,3 +26,23 @@ def test_primcat():
     assert 652 == len(linebuf)
     primdict = primcat.GetPrimDict()
     assert 17 == len(primdict.items())
+
+
+def test_morpher():
+    primcat = usdmod.PrimCat(None)
+    assert primcat is not None
+    linebuf = primcat.GetLineBuf()
+    assert 0 == len(linebuf)
+    primdict = primcat.GetPrimDict()
+    assert 0 == len(primdict.items())
+    primcat.extractPrimsFile("tests/first_test_data/sceneFile.usda")
+    linebuf = primcat.GetLineBuf()
+    assert 652 == len(linebuf)
+    primdict = primcat.GetPrimDict()
+    assert 17 == len(primdict.items())
+    morpher = usdmod.Morpher(None)
+    (olines, _) = morpher.morphLines(primcat)
+    assert olines is not None
+
+
+    
