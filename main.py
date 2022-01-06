@@ -188,7 +188,8 @@ if (args.ifname == ""):
 else:
     lines = initbuffer(args.ifname)
     primcat = usdmod.PrimCat(args)
-    primcat.extractPrims(lines)
+    # primcat.extractPrims(lines)
+    primcat.extractPrimsFile(args.ifname)
     primcat.dumpPrims()
     (olines, dblines) = morphLines(lines, primcat)
 

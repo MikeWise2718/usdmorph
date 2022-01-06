@@ -26,9 +26,14 @@
 - From a CMD prompt use `.venv\scripts\activate`
 
 
+# Testing
+- From the root directory (the one with main.py in it) you should be able to run all tests with `python -m pytest tests`
+- If you want to avoid calling pytest through python, then just make sure the root directory (or .) is in Python path
+   - see `https://docs.pytest.org/en/latest/how-to/usage.html`
+
 # To Do
-- Do to do list
-- Add a pytest test case
+* Do to do list
+* Add a pytest test case
    - Directory
    - Test code
    - Test script
@@ -36,7 +41,7 @@
 - Document Installation
    - how to create that .venv (VS Code docs)
 - Add Code Coverage
-
+- Redo logging to use standard logging module 
 
 
 
