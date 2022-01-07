@@ -6,3 +6,4 @@
 #    https://realpython.com/absolute-vs-relative-python-imports/
 from .primcat import PrimCat
 from .morpher import Morpher
+from .morphargparser import MorphArgParser

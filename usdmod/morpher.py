@@ -56,6 +56,7 @@ class Morpher:
     subGeom = False
     subXform = False
     subSkelApi = False
+    debugOutput = False
     ofname = ""
     verbosity = 0
 
@@ -69,8 +70,9 @@ class Morpher:
             self.subSkelApi = args.subSkelApi
             self.ofname = args.ofname
             self.verbosity = args.verbosity
+            self.debugOutput = args.debugOutput
 
-    def morphLines(self, primcat: PrimCat):
+    def morphLinesIntoLists(self, primcat: PrimCat):
         print(Fore.YELLOW, "Starting usd procssing" + Fore.BLUE)
 
         lines = primcat.GetLineBuf()
@@ -159,5 +161,21 @@ class Morpher:
         msg = f"Changes: Xform:{self.nXformChanges} Shader:{self.nShaderChanges} Skel:{self.nSkelChanges} SkelApi:{self.nSkelApiChanges} Varying:{self.nVaryingChanges}"
 
         print(msg)
+        return (olines, primcat.dboutlines)
 
-        return olines, primcat.dboutlines
+    def morphLines(self, primcat: PrimCat):
+
+        (olines, dblines) = self.morphLinesIntoLists(primcat)
+
+        if self.ofname != "":
+            with open(self.ofname, "w") as file:
+                file.writelines(olines)
+            print(f"{Fore.WHITE}Wrote {len(olines)} lines to {Fore.YELLOW}{self.ofname}" )
+
+        if self.debugOutput:
+            sep = "\n"
+            newlines = sep.join(dblines)
+            with open("dbout.ansi", "w") as file:
+                file.writelines(newlines)
+
+        return
