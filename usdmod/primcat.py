@@ -218,7 +218,7 @@ class PrimCat:
     def GetLineBuf(self):
         return self.linebuf
 
-    def GetPrimDict(self):       
+    def GetPrimDict(self):
         return self.primdict
 
     def extractPrimsFile(self, filename: str):
