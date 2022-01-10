@@ -21,11 +21,13 @@ def test_primcat():
     assert 0 == len(linebuf)
     primdict = primcat.GetPrimDict()
     assert 0 == len(primdict.items())
+    assert 0 == primcat.natts
     primcat.extractPrimsFile("tests/first_test_data/sceneFile.usda")
     linebuf = primcat.GetLineBuf()
     assert 652 == len(linebuf)
     primdict = primcat.GetPrimDict()
-    assert 17 == len(primdict.items())
+    assert 25 == primcat.natts
+
 
 
 def test_morpher():
@@ -35,11 +37,13 @@ def test_morpher():
     assert 0 == len(linebuf)
     primdict = primcat.GetPrimDict()
     assert 0 == len(primdict.items())
+    assert 0 == primcat.natts
     primcat.extractPrimsFile("tests/first_test_data/sceneFile.usda")
     linebuf = primcat.GetLineBuf()
     assert 652 == len(linebuf)
     primdict = primcat.GetPrimDict()
     assert 17 == len(primdict.items())
+    assert 25 == primcat.natts
 
     morpher = usdmod.Morpher(None)
     (olines, _) = morpher.morphLinesIntoLists(primcat)
@@ -61,7 +65,7 @@ def test_morpher():
     assert 0 == morpher.nShaderChanges
     assert 0 == morpher.nSkelApiChanges
     assert 0 == morpher.nVaryingChanges
-    assert 0 == morpher.nSkelChanges    
+    assert 0 == morpher.nSkelChanges
 
 
 def test_morpherwithhuman():
@@ -73,6 +77,7 @@ def test_morpherwithhuman():
     assert 1139 == len(linebuf)
     primdict = primcat.GetPrimDict()
     assert 57 == len(primdict.items())
+    assert 145 == primcat.natts
     morpher = usdmod.Morpher(parsedargs)
     (olines, _) = morpher.morphLinesIntoLists(primcat)
     assert olines is not None

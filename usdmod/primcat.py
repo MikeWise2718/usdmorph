@@ -20,6 +20,7 @@ class PrimCat:
     dboutlines = []
     seenbeforecount = 0
     linebuf = []
+    natts = 0
 
     def __init__(self, args: ArgumentParser):
         self.primdict = {}
@@ -127,6 +128,7 @@ class PrimCat:
     def addAttribute(self, entry, attname: str, fore: str, aft: str):
         attdict = entry["attributes"]
         attdict[attname] = {"attname": attname, "fore": fore, "aft": aft}
+        self.natts += 1
 
     def hasAttribute(self, primfullname: str, attname: str) -> bool:
         entry = self.primdict.get(primfullname)

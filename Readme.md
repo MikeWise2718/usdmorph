@@ -26,9 +26,9 @@
 - From a CMD prompt use `.venv\scripts\activate`
 
 
-# Testing
+# Unity Testing
 - We are using the pytest framework
-- From the root directory (the one with main.py in it) you should be able to run all tests with `python -m pytest tests`
+- From the root directory (the one with main.py in it) you should be able to run all tests with `python -m pytest -v tests`
 - If you want to avoid calling pytest through python, then just make sure the root directory (or .) is in Python path
    - see `https://docs.pytest.org/en/latest/how-to/usage.html`
 - If you want to run tests directly from VS code you need to configure the test directory for pytest in the Test Explorer 
@@ -42,7 +42,9 @@
    * Test code
    * Test script
 * Factor out morphing objects
-- Explicit options in morphing objects
+* Explicit options in morphing objects
+* Testing with arguments in ArgumentParser
+- Adjust test data directories (sampledata)
 - Document Directories
 - Document Installation
    - how to create that .venv (VS Code docs)
