@@ -17,13 +17,14 @@
 # Install and build Instructions
 - Should work by cloning 
 - How to create the .venv (see VS Code docs)
-- Currently using Windows 10 and C-Python 3.10.1
+- Currently using Windows 11 and C-Python 3.10.1
+- It is now tested with Python 3.8.4 as well (had to change one routine)
+- Really only needs `colorama` as a python module to work 
+   - `pip install colorama`
 - This is setup for use with VS Code, if you are using anything else you are on your own
 - To install packages use `python -m pip install -r requirements.txt`
    - Note that using `pip` as a standalone module might install to the wrong python 
    - To see location `pip show pip`
-- (Windows) To activate python from the `.venv` use `.venv/scripts/activate`
-- From a CMD prompt use `.venv\scripts\activate`
 
 
 # Unity Testing

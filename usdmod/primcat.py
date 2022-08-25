@@ -8,6 +8,16 @@ usdattlist = [
     "inputs:diffuseColor"
 ]
 
+def removeprefix(text, prefix):
+    if text.startswith(prefix):
+        return text[len(prefix):]
+    return text  # or whatever
+
+def removesuffix(text, suffix):
+    if text.endswith(suffix):
+        return text[len(suffix):]
+    return text  # or whatever
+
 
 class PrimCat:
     # USD Home page - https://graphics.pixar.com/usd
@@ -157,10 +167,10 @@ class PrimCat:
         return rv
 
     def remove_quotes(self, tok: str):
-        tok = tok.removeprefix("'")
-        tok = tok.removeprefix('"')
-        tok = tok.removesuffix("'")
-        tok = tok.removesuffix('"')
+        tok = removeprefix(tok,"'")
+        tok = removeprefix(tok,'"')
+        tok = removesuffix(tok,"'")
+        tok = removesuffix(tok,'"')
         return tok
 
     def isquoted(self, tok: str) -> bool:
