@@ -41,6 +41,7 @@
 * Add a pytest test case
    * Directory
    * Test code
+   * testsets
    * Test script
 * Factor out morphing objects
 * Explicit options in morphing objects

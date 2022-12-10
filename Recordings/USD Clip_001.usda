@@ -1,17 +1,3 @@
-#usda 1.0
-(
-    defaultPrim = "AgentMan"
-    endTimeCode = 213.0000114440918
-    framesPerSecond = 30
-    startTimeCode = 0
-    timeCodesPerSecond = 30
-    upAxis = "Y"
-)
-
-def "AgentMan"
-{
-    def Scope "Materials"
-    {
-    }
-}
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:28285113f264684c75d412c40cd8f0b985d211b8b998e83bea0f18c09746005a
+size 247

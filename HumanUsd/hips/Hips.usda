@@ -1,14 +1,3 @@
-#usda 1.0
-(
-    endTimeCode = 0
-    startTimeCode = 0
-    upAxis = "Y"
-)
-
-def "Hips"
-{
-    def Scope "Materials"
-    {
-    }
-}
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:3cf410e52926f244226c6f71ad995a47ef6382afd97658ae9d28da2589fda44d
+size 142

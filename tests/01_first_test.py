@@ -1,5 +1,8 @@
 import os
+import sys
 from argparse import ArgumentParser
+
+sys.path.append('..')
 
 import usdmod
 
@@ -22,7 +25,7 @@ def test_primcat():
     primdict = primcat.GetPrimDict()
     assert 0 == len(primdict.items())
     assert 0 == primcat.natts
-    primcat.extractPrimsFile("tests/first_test_data/sceneFile.usda")
+    primcat.extractPrimsFile("first_test_data/sceneFile.usda")
     linebuf = primcat.GetLineBuf()
     assert 652 == len(linebuf)
     primdict = primcat.GetPrimDict()
@@ -38,7 +41,7 @@ def test_morpher():
     primdict = primcat.GetPrimDict()
     assert 0 == len(primdict.items())
     assert 0 == primcat.natts
-    primcat.extractPrimsFile("tests/first_test_data/sceneFile.usda")
+    primcat.extractPrimsFile("first_test_data/sceneFile.usda")
     linebuf = primcat.GetLineBuf()
     assert 652 == len(linebuf)
     primdict = primcat.GetPrimDict()
@@ -69,7 +72,7 @@ def test_morpher():
 
 
 def test_morpherwithhuman():
-    args = ["--ifname", "tests/h56data/Human-0056.usda", "--ofname", "tests/h56data/Human-0056.out.usda"]
+    args = ["--ifname", "h56data/Human-0056.usda", "--ofname", "h56data/Human-0056.out.usda"]
     parsedargs: ArgumentParser = usdmod.MorphArgParser(args).parsedargs
     primcat = usdmod.PrimCat(parsedargs)
     primcat.extractPrimsFile(parsedargs.ifname)
