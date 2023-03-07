@@ -99,8 +99,12 @@ class Morpher:
             doecho = (self.verb>=3) or (((ndone % self.aev) == 0))
             if doecho & (ndone!=0):
                 elap = time.time()-start
-                rate = ndone / elap
-                secsleft = (ntodo-ndone) / rate
+                if elap==0:
+                    rate = 0
+                    secsleft = 0
+                else:
+                    rate = ndone / elap
+                    secsleft = (ntodo-ndone) / rate
                 msg = f"  {Fore.WHITE} {ndone} - Morphing lines:{Fore.YELLOW}{ndone}/{ntodo}{Fore.WHITE} elap:{elap:.2f} rate:{rate:.1f} secsleft:{secsleft:.1f}"
                 print(msg)
 
